@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Teyzem için</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+html,body{height:100%;margin:0;overflow:hidden;background:#4a1030;font-family:Caveat,'Bradley Hand','Segoe Script',cursive;color:#fff4ec;touch-action:none;-webkit-user-select:none;user-select:none}
+canvas{display:block;width:100%;height:100%}
+#ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:rgba(40,8,28,.82)}
+#ov.h{display:none}
+h1{font-size:clamp(42px,12vw,80px);margin:0 0 12px;line-height:1.05;color:#ffd27a}
+p{font-size:clamp(24px,6vw,34px);margin:0 0 26px;max-width:440px;white-space:pre-line;line-height:1.2}
+button{font:inherit;font-size:34px;padding:10px 40px;border:0;border-radius:40px;background:#ffd27a;color:#4a1030;cursor:pointer}
+button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+</style></head><body>
+<canvas id="c"></canvas>
+<div id="ov"><h1 id="t"></h1><p id="p"></p><button id="b"></button></div>
+<script>
+// Buradan ismi değiştirebilirsin (örnek: 'Ayşe teyze')
+const ISIM='teyzem';
+
+const $=id=>document.getElementById(id), cv=$('c'), ctx=cv.getContext('2d');
+let W,H;
+function size(){const d=devicePixelRatio||1;W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)}
+addEventListener('resize',size);size();
+
+const LV=[
+ {n:'Bahar bahçesi',need:12,sp:1,bg:['#4a1030','#c0436a']},
+ {n:'Çay saati',need:16,sp:1.25,bg:['#12304d','#3f98c4']},
+ {n:'Yıldızlı gece',need:20,sp:1.5,bg:['#150f3d','#7d3fc4']}
+];
+const MSG=['Seni seviyorum '+ISIM+' ❤️','İyi ki varsın!','Sen benim için çok değerlisin.','Gülüşün her şeyi güzelleştiriyor.','Seni çok özledim.','Sana sarılmak istiyorum.','Bir çay içelim mi seninle?','Kalbin altın gibi.','Sen olmasan bu dünya eksik kalırdı.','Sevgin evin her yerine yayılıyor.','Sana kocaman bir sarılma gönderiyorum!','Dünyanın en tatlı teyzesisin.','Seninle geçen her an çok güzel.','Mutluluğun hiç bitmesin.','Her şey için teşekkür ederim.','Varlığın bir hediye.','Ellerine sağlık, hep sağlıkla kal.','Seni görünce içim ısınıyor.','Gözlerin hep gülsün.','Sen benim şansımsın.','Kalbimde çok özel bir yerin var.','Seni çok ama çok seviyorum!','Sen bir tanesin '+ISIM+'.','Sesini duymak bile iyi geliyor.','Hep yanımda ol, ben de hep yanındayım.'];
+const FIN=['Seni seviyorum '+ISIM+' ❤️\nSen hayatımın en güzel hediyelerinden birisin.','Bütün bölümleri geçtin!\nSeni çok seviyorum '+ISIM+', iyi ki varsın.','Kalbimdeki yerin hiç değişmez.\nSeni seviyorum '+ISIM+' 💕','Sevgin bana hep yol gösterdi.\nSana sonsuz teşekkürler ve çok sevgi.','Bu oyun sana küçük bir sürpriz.\nGerçek sürpriz ise sana sarılmak. Seni seviyorum!','Dünyanın en güzel kalbi sende.\nSeni çok seviyorum '+ISIM+'.'];
+function bagger(a){let b=[];return()=>{if(!b.length)b=a.slice().sort(()=>Math.random()-.5);return b.pop()}}
+const nextMsg=bagger(MSG), nextFin=bagger(FIN);
+
+let st='idle',lvl=0,got=0,lives=3,combo=0,score=0,slow=0,wide=0,shake=0,px=W/2,items=[],ps=[],msg='',msgT=0,spawn=0,last=performance.now(),A,best=0;
+try{best=+localStorage.getItem('teyze-best')||0}catch(e){}
+const stars=Array.from({length:45},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.8+.5,p:Math.random()*6}));
+
+function beep(f,d=.1){try{A=A||new AudioContext();const o=A.createOscillator(),g=A.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.08,A.currentTime);g.gain.exponentialRampToValueAtTime(.001,A.currentTime+d);o.connect(g);g.connect(A.destination);o.start();o.stop(A.currentTime+d)}catch(e){}}
+function show(h,p,b,fn){$('t').textContent=h;$('p').textContent=p;$('b').textContent=b;$('b').onclick=()=>{beep(520);$('ov').className='h';fn()};$('ov').className=''}
+function say(s){msg=s;msgT=3}
+function burst(x,y,e){for(let i=0;i<9;i++){const a=Math.random()*6.28,v=60+Math.random()*120;ps.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,l:1,e})}}
+function startLevel(){got=0;lives=3;combo=0;items=[];slow=wide=0;msg='';st='play'}
+function newGame(){lvl=0;score=0;startLevel()}
+function save(){if(score>best){best=score;try{localStorage.setItem('teyze-best',best)}catch(e){}}}
+
+function move(e){const t=e.touches?e.touches[0]:e;px=Math.max(40,Math.min(W-40,t.clientX))}
+addEventListener('pointermove',move);addEventListener('pointerdown',move);addEventListener('touchmove',move,{passive:true});
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft')px=Math.max(40,px-40);if(e.key==='ArrowRight')px=Math.min(W-40,px+40)});
+
+function update(dt){
+ const L=LV[lvl],by=H-100,half=wide>0?56:38,k=slow>0?.5:1;
+ slow-=dt;wide-=dt;shake-=dt;
+ spawn-=dt;
+ if(spawn<=0){spawn=Math.max(.32,.8-lvl*.14);const r=Math.random();
+  items.push({x:30+Math.random()*(W-60),y:-30,v:(120+Math.random()*70)*L.sp,e:r<.58?'❤️':r<.70?'🌷':r<.76?'☕':'💔'})}
+ for(const i of items){
+  i.y+=i.v*dt*k;
+  if(!i.d&&i.y>by-24&&i.y<by+30&&Math.abs(i.x-px)<half+8){
+   i.d=1;
+   if(i.e==='💔'){lives--;combo=0;shake=.4;beep(160,.25);burst(i.x,i.y,'💧');say('Olsun, devam et!')}
+   else if(i.e==='☕'){wide=slow=6;beep(880,.2);burst(i.x,i.y,'✨');say('Çay molası! Her şey yavaşladı ☕')}
+   else{combo++;const m=1+Math.floor(combo/5);const w=i.e==='🌷'?2:1;got+=w;score+=10*w*m;beep(600+Math.min(combo,15)*25);burst(i.x,i.y,'✨');say(nextMsg())}
+  }
+  if(!i.d&&i.y>H+40&&i.e!=='💔'&&i.e!=='☕')combo=0;
+ }
+ items=items.filter(i=>!i.d&&i.y<H+40);
+ if(lives<=0){st='idle';save();show('Olsun '+ISIM+', tekrar dene 💕',nextMsg()+'\nPuan: '+score,'Tekrar dene',startLevel)}
+ else if(got>=L.need){
+  st='idle';save();
+  if(lvl<LV.length-1){show('Bölüm tamam! 🎉',nextMsg(),'Sıradaki bölüm',()=>{lvl++;startLevel()})}
+  else{st='fin';show('Seni seviyorum '+ISIM+' ❤️',nextFin()+'\n\nPuan: '+score+(score>=best?' (yeni rekor!)':''),'Tekrar oyna',newGame)}
+ }
+}
+
+function glass(x,y,s){
+ ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+ ctx.fillStyle='#fff4ec';ctx.beginPath();ctx.ellipse(0,34,46,7,0,0,6.28);ctx.fill();
+ const p=new Path2D();p.moveTo(-24,-22);p.quadraticCurveTo(-28,8,-13,31);p.lineTo(13,31);p.quadraticCurveTo(28,8,24,-22);p.closePath();
+ ctx.fillStyle='rgba(255,255,255,.28)';ctx.fill(p);
+ ctx.save();ctx.clip(p);ctx.fillStyle='#b5301f';ctx.fillRect(-30,-8,60,44);ctx.restore();
+ ctx.strokeStyle='#fff4ec';ctx.lineWidth=2;ctx.stroke(p);ctx.restore();
+}
+
+function draw(t){
+ const L=LV[lvl],g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,L.bg[0]);g.addColorStop(1,L.bg[1]);
+ ctx.save();if(shake>0)ctx.translate((Math.random()-.5)*8,(Math.random()-.5)*8);
+ ctx.fillStyle=g;ctx.fillRect(-10,-10,W+20,H+20);
+ for(const s of stars){ctx.globalAlpha=.4+.4*Math.sin(t/700+s.p);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r,0,6.28);ctx.fill()}
+ ctx.globalAlpha=1;ctx.textAlign='center';ctx.font='38px serif';
+ for(const i of items)ctx.fillText(i.e,i.x,i.y);
+ if(st==='play')glass(px,H-100,wide>0?1.4:1);
+ for(const p of ps){ctx.globalAlpha=Math.max(0,p.l);ctx.font='20px serif';ctx.fillText(p.e,p.x,p.y)}
+ ctx.globalAlpha=1;ctx.restore();
+ if(st==='play'||st==='idle'&&got>0){
+  ctx.font='700 30px Caveat,cursive';ctx.fillStyle='#fff4ec';
+  ctx.textAlign='left';ctx.fillText('❤️'.repeat(Math.max(lives,0)),16,52);
+  ctx.textAlign='center';ctx.fillText(L.n,W/2,52);
+  ctx.textAlign='right';ctx.fillText(score+(combo>=5?'  x'+(1+Math.floor(combo/5)):''),W-16,52);
+  ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(20,64,W-40,8);
+  ctx.fillStyle='#ffd27a';ctx.fillRect(20,64,(W-40)*Math.min(1,got/L.need),8);
+ }
+ if(msgT>0&&st==='play'){
+  ctx.globalAlpha=Math.min(1,msgT);let fs=38;ctx.font='700 '+fs+'px Caveat,cursive';
+  while(ctx.measureText(msg).width>W-30&&fs>16){fs--;ctx.font='700 '+fs+'px Caveat,cursive'}
+  ctx.textAlign='center';ctx.fillStyle='#ffd27a';ctx.fillText(msg,W/2,118);ctx.globalAlpha=1;
+ }
+}
+
+function loop(t){
+ const dt=Math.min(.04,(t-last)/1000);last=t;
+ if(st==='play')update(dt);
+ if(st==='fin'&&Math.random()<.35)ps.push({x:Math.random()*W,y:-10,vx:0,vy:140+Math.random()*80,l:3,e:'❤️'});
+ msgT-=dt;
+ for(const p of ps){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=(st==='fin'?0:180)*dt;p.l-=dt*(st==='fin'?.3:1.4)}
+ ps=ps.filter(p=>p.l>0);
+ draw(t);requestAnimationFrame(loop);
+}
+show('Teyzem için','Çay bardağını parmağınla kaydır, kalpleri yakala. Kırık kalplerden kaç!\n3 bölüm var.'+(best?'\nRekorun: '+best:''),'Başla',newGame);
+requestAnimationFrame(loop);
+</script></body></html>
