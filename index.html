@@ -43,6 +43,17 @@ h1{font-size:clamp(54px,16vw,88px);color:var(--gold);margin:0;line-height:1}
 @media (prefers-reduced-motion:reduce){.sp{animation:none}}
 .mf canvas{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 0 22px rgba(255,210,122,.55))}
 #mvid{position:absolute;width:2px;height:2px;opacity:0;pointer-events:none}
+#hh{background:none;border:0;font:inherit;color:inherit;padding:0 2px;cursor:pointer}
+#gz{position:fixed;inset:0;z-index:7;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:radial-gradient(circle at 50% 30%,#7d2447,#2c0a24 75%)}
+#gz.on{display:flex}
+.pol{background:#fffaf3;padding:14px 14px 50px;border-radius:6px;box-shadow:0 14px 40px #000a;transform:rotate(-3deg);width:min(78vw,320px);animation:pin .7s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pin{from{transform:rotate(-14deg) scale(.4);opacity:0}}
+.pol img{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:#ddd;border-radius:2px}
+.pol .miss{display:none;aspect-ratio:1;align-items:center;justify-content:center;color:#7d2447;font-size:26px;padding:16px;background:#f3e6dc}
+#gt{font-size:clamp(28px,7vw,38px);line-height:1.2;color:var(--gold);max-width:420px;margin:26px 0 14px;white-space:pre-line}
+.rain{position:fixed;top:-40px;pointer-events:none;z-index:8;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(115vh) rotate(40deg)}}
+@media (prefers-reduced-motion:reduce){.pol,.rain{animation:none}}
 </style></head><body>
 <main>
 <h1>Teyzem için</h1>
@@ -52,7 +63,7 @@ h1{font-size:clamp(54px,16vw,88px);color:var(--gold);margin:0;line-height:1}
 <a class="card" href="iksir.html"><div class="ic">🧪</div><div><b>Sevgi İksirleri</b><span>İksirleri renklerine göre ayır. 30 seviye!</span></div></a>
 <button class="card" id="open"><div class="ic">☕</div><div><b>Sevgi Falı</b><span>Fincanı salla, falına ne çıkacak bak.</span></div></button>
 <button class="card gold" id="mopen"><div class="ic">🪞</div><div><b>Dünyanın en güzel teyzesini görmek için tıkla</b><span>Dikkat: çok güzel biri çıkabilir 😄</span></div></button>
-<div class="foot">Seni seviyorum <span id="n"></span> ❤️</div>
+<div class="foot">Seni seviyorum <span id="n"></span> <button id="hh" aria-label="Sürpriz">❤️</button></div>
 </main>
 <div id="fal" role="dialog" aria-label="Sevgi falı">
 <button id="cup" aria-label="Fincanı salla">☕</button>
@@ -64,6 +75,7 @@ h1{font-size:clamp(54px,16vw,88px);color:var(--gold);margin:0;line-height:1}
 <span class="sp" style="left:-14px;top:12%">✨</span><span class="sp" style="right:-14px;top:30%;animation-delay:.6s">💖</span><span class="sp" style="left:-10px;bottom:14%;animation-delay:1.2s">🌷</span><span class="sp" style="right:-8px;bottom:6%;animation-delay:1.8s">✨</span></div>
 <div id="mcap"></div><button class="go s" id="mclose">Kapat</button>
 </div>
+<div id="gz" role="dialog" aria-label="Sürpriz"><div class="pol"><img id="gi" alt="Sürpriz fotoğraf"><div class="miss" id="gm">foto.jpg dosyası bulunamadı. Repo'ya yükle 🙂</div></div><div id="gt"></div><button class="go s" id="gc">Kapat</button></div>
 <script src="ayar.js"></script>
 <script>
 const $=id=>document.getElementById(id);
@@ -115,4 +127,11 @@ async function openMirror(){
 }
 function closeMirror(){clearInterval(mi);cancelAnimationFrame(raf);if(ms)ms.getTracks().forEach(t=>t.stop());ms=null;$('mvid').srcObject=null;$('mir').classList.remove('on')}
 $('mopen').onclick=openMirror;$('mclose').onclick=closeMirror;
+
+let hc=0,ht;
+$('hh').onclick=()=>{hc++;clearTimeout(ht);ht=setTimeout(()=>hc=0,1500);if(hc>=3){hc=0;openGz()}};
+function openGz(){const i=$('gi');i.style.display='block';$('gm').style.display='none';i.onerror=()=>{i.style.display='none';$('gm').style.display='flex'};i.src='foto.jpg';
+ $('gt').textContent=typeof GIZLI_YAZI!=='undefined'?GIZLI_YAZI:'Seni çok seviyorum '+ISIM+' ❤️';$('gz').classList.add('on');
+ for(let k=0;k<40;k++){const e=document.createElement('span');e.className='rain';e.textContent=['❤️','🌷','✨','💕'][k%4];e.style.left=Math.random()*100+'vw';e.style.fontSize=(20+Math.random()*20)+'px';e.style.animationDuration=(2.5+Math.random()*2.5)+'s';e.style.animationDelay=Math.random()*1.5+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),7000)}}
+$('gc').onclick=()=>$('gz').classList.remove('on');
 </script></body></html>
