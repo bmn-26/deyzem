@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sevgi İksirleri</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#ffd27a;--cream:#fff4ec;--w:52px;--h:40px}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% 0,#6b2150,#2c0a24 70%) fixed;color:var(--cream);font-family:Caveat,'Bradley Hand','Segoe Script',cursive;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+body{display:flex;flex-direction:column;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px calc(env(safe-area-inset-bottom,0px) + 14px)}
+header{width:100%;max-width:460px;display:flex;justify-content:space-between;align-items:center;font-size:28px}
+header a{color:var(--gold);text-decoration:none}
+.tools{display:flex;gap:8px;margin:8px 0}
+.tools button{font:inherit;font-size:26px;color:var(--cream);background:rgba(255,255,255,.1);border:1.5px solid rgba(255,210,122,.45);border-radius:20px;padding:4px 16px;cursor:pointer}
+.tools button:disabled{opacity:.35;cursor:default}
+.tools button:focus-visible,.tube:focus-visible{outline:3px solid #fff;outline-offset:3px}
+#msg{white-space:pre-line;min-height:68px;font-size:30px;line-height:1.1;color:var(--gold);text-align:center;max-width:440px;display:flex;align-items:center;justify-content:center}
+#field{display:flex;flex-wrap:wrap;justify-content:center;gap:30px 12px;max-width:460px;width:100%;padding-top:34px}
+.tube{position:relative;width:var(--w);height:calc(var(--h)*4 + 8px);border:3px solid rgba(255,255,255,.6);border-top:0;border-radius:0 0 calc(var(--w)/2) calc(var(--w)/2);background:rgba(255,255,255,.08);cursor:pointer;transition:transform .25s;padding:0;font:inherit}
+.tube::before{content:"";position:absolute;top:-6px;left:-7px;right:-7px;height:8px;border-radius:6px;background:rgba(255,255,255,.75)}
+.tube::after{content:"";position:absolute;top:6px;bottom:14px;left:7px;width:6px;border-radius:4px;background:linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.05));pointer-events:none}
+.liq{position:absolute;inset:0;display:flex;flex-direction:column-reverse;overflow:hidden;border-radius:0 0 calc(var(--w)/2) calc(var(--w)/2)}
+.seg{flex:none;height:var(--h);animation:grow .3s}
+@keyframes grow{from{transform:scaleY(.2);opacity:.4}}
+.tube.sel{transform:translateY(-22px)}
+.tube.done{border-color:var(--gold);box-shadow:0 0 18px var(--gold)}
+.tube.pour{transition:transform .5s;z-index:3}
+#ov{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:rgba(30,6,24,.9);z-index:5}
+#ov.h{display:none}
+h1{font-size:clamp(40px,11vw,70px);margin:0 0 12px;line-height:1.05;color:var(--gold)}
+p{font-size:clamp(24px,6vw,34px);margin:0 0 24px;max-width:440px;white-space:pre-line;line-height:1.2}
+.go{font:inherit;font-size:32px;padding:10px 38px;border:0;border-radius:40px;background:var(--gold);color:#3a0c27;cursor:pointer;margin:5px}
+.go.s{background:transparent;color:var(--cream);border:2px solid var(--cream);font-size:26px;padding:6px 26px}
+#ov a{color:var(--cream);font-size:26px;margin-top:12px}
+[hidden]{display:none}
+.rain{position:fixed;top:-40px;pointer-events:none;z-index:6;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(115vh) rotate(40deg)}}
+@media (prefers-reduced-motion:reduce){.tube,.seg{transition:none;animation:none}}
+</style></head><body>
+<header><a href="index.html">← Menü</a><span id="lv"></span><span id="mv"></span></header>
+<div class="tools"><button id="un" aria-label="Geri al">↶ Geri al</button><button id="rs" aria-label="Yeniden başla">↻</button><button id="ex" aria-label="Boş tüp ekle">＋ Tüp</button></div>
+<div id="msg">Renkleri tüplere ayır. Dolu bir tüp, bir iksir demek!</div>
+<div id="field"></div>
+<div id="ov"><h1 id="t"></h1><p id="p"></p><button class="go" id="b"></button><button class="go s" id="b2" hidden></button><a href="index.html">← Menüye dön</a></div>
+<script src="ayar.js"></script>
+<script>
+const $=id=>document.getElementById(id),TOP=30;
+const P=[['#ff7aa2','#e0477a','Sevgi','💗','Seni çok seviyorum '+ISIM+' ❤️'],['#ffd23f','#e6a800','Neşe','🌞','Gülüşün her şeyi güzelleştiriyor.'],['#5ad1c4','#1f9e92','Huzur','🌿','Yanında hep huzur buluyorum.'],['#6a4cf0','#4328b8','Şefkat','🦋','Şefkatin dünyaya yeter.'],['#ff9f1c','#e0710a','Bereket','🍯','Sofran hep bereketli olsun.'],['#5ad17a','#2a9e4c','Mutluluk','🍀','Mutluluğun hiç bitmesin.'],['#4da3ff','#2467d6','Umut','⭐','Her zaman umut veriyorsun.'],['#e63946','#a6202c','Şükran','🌹','Her şey için teşekkür ederim.'],['#e8b4ff','#c07fe0','Sağlık','🌸','Hep sağlıkla kal.'],['#b9794a','#7e4a24','Güzellik','🌷','Kalbin de yüzün gibi güzel.']];
+const LET=['Bu iksirler sevgiyle karıştı,\ntıpkı seninle bizim aramız gibi.','Sen her şeyi sakin ve güzel çözersin.\nİyi ki varsın '+ISIM+'.','Her renk bir güzel dilek.\nHepsi senin için.','Sabrın ve şefkatin\nbana hep örnek oldu.','Bu seviyeyi geçtin,\nkalbimdeki yerin hep ilk sırada.','Seni düşünerek hazırladım bunları.\nSeni çok seviyorum!','Elin ne kadar becerikli!\nHer şeyi güzelleştiriyorsun.','Bir tüp daha doldu,\nbir sevgi daha çoğaldı.','Sen güldükçe\nbütün iksirler tatlanıyor.','Hiç yorulma ama yorulursan\nbir çay iç, ben de yanındayım ☕','Dünyanın en güzel karışımı:\nsen ve sevgin.','Çok yaşa '+ISIM+'!\nBravo sana.','Her renkten bir selam,\nher selamdan bir sevgi.','Sana sağlık, huzur\nve bol bol gülmek diliyorum.','İksirler senin için çalışıyor\nçünkü sen çok özelsin.','Gönlün de iksirler gibi\nrenkli ve güzel.','Sevgimi bir tüpe sığdıramadım,\nbu yüzden bu kadar çok seviye var 😄','Seni ne kadar sevdiğimi\nhiçbir iksir anlatamaz.','Hep böyle gül,\nhep böyle güzel kal.','Bu seviye de tamam.\nSana sarılmak istiyorum!'];
+const FIN=['Bütün iksirleri hazırladın '+ISIM+'!\nSeni çok ama çok seviyorum ❤️','30 seviyeyi bitirdin!\nSen hem çok akıllı hem çok sevgi dolusun.','Sihirli iksirin sırrı sendin:\nSevgi. Seni seviyorum '+ISIM+' 💕'];
+function bag(a){let b=[];return()=>{if(!b.length)b=a.slice().sort(()=>Math.random()-.5);return b.pop()}}
+const nextL=bag(LET),nextF=bag(FIN);
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let A,tubes,sel=-1,stack=[],moves=0,lvl=0,extra=0,busy=0,saved=0;
+try{saved=+localStorage.getItem('iksir-lvl')||0}catch(e){}
+function beep(f,d=.1){try{A=A||new AudioContext();const o=A.createOscillator(),g=A.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.07,A.currentTime);g.gain.exponentialRampToValueAtTime(.001,A.currentTime+d);o.connect(g);g.connect(A.destination);o.start();o.stop(A.currentTime+d)}catch(e){}}
+function chime(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.25),i*130))}
+function gen(n){
+ const c=Math.min(10,3+Math.floor((n-1)/3)),r=rng(n*7919);let t;
+ for(let k=0;k<60;k++){const pool=[];for(let i=0;i<c;i++)for(let j=0;j<4;j++)pool.push(i);
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
+  t=[];for(let i=0;i<c;i++)t.push(pool.slice(i*4,i*4+4));
+  if(!t.some(isDone))break}
+ return [...t,[],[]];
+}
+const isDone=t=>t.length===4&&t.every(x=>x===t[0]);
+function show(h,p,b,fn,b2,fn2){$('t').textContent=h;$('p').textContent=p;$('b').textContent=b;$('b').onclick=()=>{beep(520);$('ov').className='h';fn()};
+ $('b2').hidden=!b2;if(b2){$('b2').textContent=b2;$('b2').onclick=()=>{$('ov').className='h';fn2()}}$('ov').className=''}
+function start(n){lvl=n;tubes=gen(n+1);sel=-1;stack=[];moves=0;extra=0;busy=0;$('msg').textContent='Renkleri tüplere ayır. Dolu bir tüp, bir iksir demek!';build()}
+function build(){
+ const f=$('field');f.innerHTML='';const n=tubes.length,row=n<=6?n:Math.ceil(n/2),w=Math.min(64,Math.floor((Math.min(innerWidth,460)-30-12*(row-1))/row));
+ f.style.setProperty('--w',w+'px');document.documentElement.style.setProperty('--w',w+'px');document.documentElement.style.setProperty('--h',Math.round(w*.78)+'px');
+ tubes.forEach((t,i)=>{const d=document.createElement('button');d.className='tube'+(isDone(t)?' done':'');d.setAttribute('aria-label','Tüp '+(i+1));
+  d.innerHTML='<div class="liq">'+t.map(c=>'<div class="seg" style="background:linear-gradient(90deg,'+P[c][0]+','+P[c][1]+')"></div>').join('')+'</div>';
+  d.onclick=()=>tap(i);f.appendChild(d)});
+ $('lv').textContent='Seviye '+(lvl+1)+' / '+TOP;$('mv').textContent='🔄 '+moves;$('un').disabled=!stack.length;$('ex').disabled=!!extra;
+}
+function mark(){[...$('field').children].forEach((e,i)=>e.classList.toggle('sel',i===sel))}
+function can(s,d){const a=tubes[s],b=tubes[d];if(!a.length)return 0;const c=a[a.length-1];if(b.length&&b[b.length-1]!==c)return 0;let run=1;while(run<a.length&&a[a.length-1-run]===c)run++;return Math.min(run,4-b.length)}
+function tap(i){
+ if(busy)return;
+ if(sel<0){if(tubes[i].length&&!isDone(tubes[i])){sel=i;mark();beep(600,.06)}return}
+ if(sel===i){sel=-1;mark();return}
+ const amt=can(sel,i);
+ if(!amt){beep(200,.12);sel=tubes[i].length&&!isDone(tubes[i])?i:-1;mark();return}
+ const s=sel,els=$('field').children,es=els[s],ed=els[i],rs=es.getBoundingClientRect(),rd=ed.getBoundingClientRect(),dir=rd.left>rs.left?1:-1;
+ busy=1;es.classList.remove('sel');es.classList.add('pour');
+ es.style.transform='translate('+(rd.left-rs.left-dir*rs.height*.32)+'px,'+(rd.top-rs.top-rs.height*.55)+'px) rotate('+(dir*70)+'deg)';
+ beep(420,.3);
+ setTimeout(()=>{stack.push(JSON.stringify(tubes));for(let k=0;k<amt;k++)tubes[i].push(tubes[s].pop());moves++;sel=-1;busy=0;build();
+  if(isDone(tubes[i])){const p=P[tubes[i][0]];$('msg').textContent=p[3]+' '+p[2]+' İksiri hazır!\n'+p[4];chime()}
+  if(tubes.every(t=>!t.length||isDone(t)))setTimeout(win,900)},520);
+}
+function rain(){for(let i=0;i<40;i++){const s=document.createElement('span');s.className='rain';s.textContent=['❤️','🌷','✨','🧪'][i%4];s.style.left=Math.random()*100+'vw';s.style.fontSize=(20+Math.random()*20)+'px';s.style.animationDuration=(2.5+Math.random()*2.5)+'s';s.style.animationDelay=Math.random()*1.5+'s';document.body.appendChild(s);setTimeout(()=>s.remove(),7000)}}
+function win(){
+ chime();rain();
+ if(lvl<TOP-1){try{localStorage.setItem('iksir-lvl',lvl+1)}catch(e){}saved=lvl+1;
+  show('Seviye '+(lvl+1)+' tamam 🎉',nextL()+'\n\n'+moves+' hamlede bitirdin','Sıradaki seviye',()=>start(lvl+1))}
+ else{try{localStorage.setItem('iksir-lvl',0)}catch(e){}saved=0;show('Seni seviyorum '+ISIM+' ❤️',nextF(),'Baştan oyna',()=>start(0))}
+}
+$('un').onclick=()=>{if(busy||!stack.length)return;tubes=JSON.parse(stack.pop());moves--;sel=-1;build()};
+$('rs').onclick=()=>{if(!busy)start(lvl)};
+$('ex').onclick=()=>{if(busy||extra)return;stack.push(JSON.stringify(tubes));extra=1;tubes.push([]);build();$('msg').textContent='Yeni bir boş tüp eklendi 🧪'};
+tubes=gen(1);
+const intro='Bir tüpten diğerine iksir dök.\nAynı renkleri aynı tüpte topla.\n30 seviye ve her iksirde bir iltifat var.';
+if(saved>0&&saved<TOP)show('Sevgi İksirleri',intro,'Devam: Seviye '+(saved+1),()=>start(saved),'Baştan başla',()=>start(0));
+else show('Sevgi İksirleri',intro,'Başla',()=>start(0));
+</script></body></html>

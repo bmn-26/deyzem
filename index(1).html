@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Teyzem için</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#ffd27a;--cream:#fff4ec}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:linear-gradient(#3a0c27,#7d2447 60%,#b83b5e) fixed;color:var(--cream);font-family:Caveat,'Bradley Hand','Segoe Script',cursive}
+main{position:relative;z-index:1;max-width:460px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 30px) 20px calc(env(safe-area-inset-bottom,0px) + 30px);text-align:center}
+h1{font-size:clamp(54px,16vw,88px);color:var(--gold);margin:0;line-height:1}
+.sub{font-size:28px;margin:8px 0 26px}
+.card{display:flex;align-items:center;gap:16px;width:100%;margin:0 0 14px;padding:16px 18px;text-align:left;color:inherit;font:inherit;text-decoration:none;border-radius:26px;border:1.5px solid rgba(255,210,122,.4);background:rgba(255,255,255,.08);cursor:pointer;transition:transform .2s,background .2s}
+.card:hover,.card:focus-visible{transform:translateY(-3px);background:rgba(255,255,255,.16);outline:none}
+.card:focus-visible{border-color:#fff}
+.card:active{transform:scale(.98)}
+.ic{font-size:54px;flex:none}
+.card b{display:block;font-size:36px;color:var(--gold);line-height:1;margin-bottom:4px}
+.card span{font-size:25px;line-height:1.1}
+.foot{font-size:30px;margin-top:24px}
+.fl{position:fixed;bottom:-40px;opacity:.45;pointer-events:none;animation:up linear infinite}
+@keyframes up{to{transform:translateY(-115vh) rotate(25deg)}}
+#fal{position:fixed;inset:0;z-index:5;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:rgba(40,8,28,.92)}
+#fal.on{display:flex}
+#cup{font-size:120px;background:none;border:0;cursor:pointer;line-height:1}
+#cup.sh{animation:sh .25s 5}
+@keyframes sh{25%{transform:rotate(-14deg)}75%{transform:rotate(14deg)}}
+#ft{font-size:clamp(28px,7vw,38px);line-height:1.2;max-width:440px;min-height:130px;margin:10px 0 18px;color:var(--gold)}
+.go{font:inherit;font-size:30px;padding:8px 34px;border:0;border-radius:40px;background:var(--gold);color:#3a0c27;cursor:pointer;margin:4px}
+.go.s{background:transparent;color:var(--cream);border:2px solid var(--cream);font-size:26px}
+@media (prefers-reduced-motion:reduce){.fl{display:none}.card{transition:none}}
+</style></head><body>
+<main>
+<h1>Teyzem için</h1>
+<div class="sub">Bugün ne oynamak istersin? 💕</div>
+<a class="card" href="kalp-yagmuru.html"><div class="ic">🫖</div><div><b>Kalp Yağmuru</b><span>Çay bardağıyla kalpleri yakala. 10 bölüm!</span></div></a>
+<a class="card" href="hafiza.html"><div class="ic">🌷</div><div><b>Hafıza Bahçesi</b><span>Kartları eşleştir, her eşleşmede bir iltifat kazan.</span></div></a>
+<a class="card" href="iksir.html"><div class="ic">🧪</div><div><b>Sevgi İksirleri</b><span>İksirleri renklerine göre ayır. 30 seviye!</span></div></a>
+<button class="card" id="open"><div class="ic">☕</div><div><b>Sevgi Falı</b><span>Fincanı salla, falına ne çıkacak bak.</span></div></button>
+<div class="foot">Seni seviyorum <span id="n"></span> ❤️</div>
+</main>
+<div id="fal" role="dialog" aria-label="Sevgi falı">
+<button id="cup" aria-label="Fincanı salla">☕</button>
+<div id="ft">Fincana dokun ve salla!</div>
+<div><button class="go" id="again" hidden>Bir daha bak</button><button class="go s" id="close">Kapat</button></div>
+</div>
+<script src="ayar.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+$('n').textContent=ISIM;
+for(let i=0;i<12;i++){const s=document.createElement('span');s.className='fl';s.textContent=['❤️','🌷','💕','✨'][i%4];s.style.left=Math.random()*100+'vw';s.style.fontSize=(18+Math.random()*18)+'px';s.style.animationDuration=(9+Math.random()*9)+'s';s.style.animationDelay=(-Math.random()*14)+'s';document.body.appendChild(s)}
+const FAL=['Falında büyük bir mutluluk görünüyor. Sevdiklerin hep yanında olacak.','Yakında bir misafir geliyor. Aslında o misafir benim 😄','Kalbinde taşıdığın sevgi sana kat kat geri dönecek.','Bir yolculuk görünüyor, sonunda koca bir sarılma var.','Fincanda bir kalp var, tam ortada. O kalp senin.','Güzel bir haber yolda. Yüzün hep gülecek.','Sağlığın hep yerinde, evin bereketli olacak.','Bir çay daha iç, falında şans görünüyor ☕','Yıldızın parlıyor. Bu yıl çok güzel şeyler olacak.','Fincanda bir kuş var: huzur ve mutluluk getiriyor.','Biri seni çok özlüyor ve çok seviyor. Tahmin et kim?','Bir sofra kuruluyor, etrafında herkes mutlu, ortasında sen.','Yolun hep açık olsun, duaların kabul olsun.','Falın güzel çıktı: sevgi, sağlık, huzur ve neşe.','Bir tatlı sürpriz yaklaşıyor, hazır ol!','Fincanın dibinde "Seni seviyorum '+ISIM+'" yazıyor ❤️'];
+let b=[],busy=0;const next=()=>{if(!b.length)b=FAL.slice().sort(()=>Math.random()-.5);return b.pop()};
+function reset(){$('ft').textContent='Fincana dokun ve salla!';$('again').hidden=true}
+function shake(){if(busy)return;busy=1;$('again').hidden=true;$('ft').textContent='Fal bakılıyor...';$('cup').classList.add('sh');
+ setTimeout(()=>{$('cup').classList.remove('sh');$('ft').textContent=next();$('again').hidden=false;busy=0},1400)}
+$('open').onclick=()=>{reset();$('fal').classList.add('on');$('cup').focus()};
+$('close').onclick=()=>$('fal').classList.remove('on');
+$('cup').onclick=shake;$('again').onclick=shake;
+</script></body></html>
