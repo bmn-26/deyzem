@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hafıza Bahçesi</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#ffd27a;--cream:#fff4ec}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:linear-gradient(#3a0c27,#7d2447 60%,#b83b5e) fixed;color:var(--cream);font-family:Caveat,'Bradley Hand','Segoe Script',cursive;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+body{display:flex;flex-direction:column;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px calc(env(safe-area-inset-bottom,0px) + 14px)}
+header{width:100%;max-width:440px;display:flex;justify-content:space-between;font-size:28px}
+header a{color:var(--gold);text-decoration:none}
+#bar{width:100%;max-width:440px;height:8px;border-radius:4px;background:rgba(255,255,255,.2);margin:6px 0}
+#bar i{display:block;height:100%;width:0;background:var(--gold);border-radius:4px;transition:width .4s}
+#msg{min-height:44px;font-size:30px;line-height:1.1;color:var(--gold);text-align:center;margin:0 0 6px;display:flex;align-items:center}
+#grid{display:grid;gap:10px;width:100%;max-width:440px;grid-template-columns:repeat(var(--c),1fr)}
+.card{aspect-ratio:1/1.1;perspective:600px;cursor:pointer;border:0;background:none;padding:0;font:inherit}
+.in{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+.open .in{transform:rotateY(180deg)}
+.f,.b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.b{background:linear-gradient(135deg,#c0436a,#8a2a4f);border:2px solid rgba(255,210,122,.6);font-size:28px}
+.f{background:var(--cream);transform:rotateY(180deg);font-size:clamp(30px,10vw,46px)}
+.done .f{background:#ffe9b8;box-shadow:0 0 18px #ffd27a}
+.card:focus-visible{outline:3px solid #fff;outline-offset:2px;border-radius:16px}
+#ov{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:rgba(40,8,28,.88);z-index:5}
+#ov.h{display:none}
+h1{font-size:clamp(40px,11vw,70px);margin:0 0 12px;line-height:1.05;color:var(--gold)}
+p{font-size:clamp(24px,6vw,34px);margin:0 0 24px;max-width:440px;white-space:pre-line;line-height:1.2}
+button.go{font:inherit;font-size:32px;padding:10px 38px;border:0;border-radius:40px;background:var(--gold);color:#3a0c27;cursor:pointer}
+#ov a{color:var(--cream);font-size:26px;margin-top:14px}
+.fx,.rain{position:fixed;pointer-events:none;z-index:6}
+.fx{font-size:28px;animation:fl 1.2s forwards}
+@keyframes fl{to{transform:translateY(-90px);opacity:0}}
+.rain{top:-40px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(115vh) rotate(40deg)}}
+@media (prefers-reduced-motion:reduce){.in{transition:none}}
+</style></head><body>
+<header><a href="index.html">← Menü</a><span id="lv"></span><span id="mv"></span></header>
+<div id="bar"><i id="pr"></i></div>
+<div id="msg"></div>
+<div id="grid"></div>
+<div id="ov"><h1 id="t"></h1><p id="p"></p><button class="go" id="b"></button><a href="index.html">← Menüye dön</a></div>
+<script src="ayar.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const LV=[['Isınma',12,3],['Çay molası',16,4],['Gönül bahçesi',20,4],['Büyük sevgi',24,4]];
+const IC=['🫖','🌷','🧿','🥮','🍯','🧶','🪔','🌹','🏡','🍵','🥐','🧁','🍓','🦋','🌻','🕊️'];
+const CMP=['Ne kadar zekisin '+ISIM+'!','Hafızan çok güçlü!','Gülüşün kartlardan bile güzel.','Harika bir eşleşme, tıpkı bizim gibi 💕','Sen her şeyi başarırsın.','Seninle oyun bile daha güzel.','Maşallah, ne dikkatli gözler!','Kalbin gibi temiz, aklın gibi keskin.','Çok yaşa '+ISIM+'!','Bir tanesin!','Seni seviyorum '+ISIM+' ❤️','Güzel yüzün hep gülsün.','Sevgin gibi sınırsız bir hafıza!','Sana hayranım.','Her eşleşmede kalbim biraz daha ısınıyor.','Sen yıldız gibi parlıyorsun.','Dünyanın en tatlı teyzesi!','Eline sağlık, zihnine sağlık!','Bugün de çok güzelsin.','Seninle gurur duyuyorum.','Sen bir hazinesin.','İyi ki varsın!','Sana sarılmak istiyorum.','Çaylar benden, kazanan sensin ☕','Bravo, bravo, bravo!','Ne güzel bir kalp taşıyorsun.','Seni görünce dünya güzelleşiyor.','Her şey seninle güzel.','Bu işi senden başkası yapamaz.','Kalbimin ortasındasın.'];
+const LET=['Isındın bile!\nHafızan da kalbin gibi güçlü.','Çay molası bitti\nama sevgim hiç bitmez.','Gönül bahçen gibi,\nburası da çiçek açtı.'];
+const FIN=['Tüm kartları çözdün!\nSen hem akıllı hem çok güzel kalplisin. Seni seviyorum '+ISIM+' ❤️','Hafızan harika '+ISIM+'!\nAma bir şeyi hiç unutma: seni çok seviyorum.','Bitirdin!\nBu oyunun en değerli kartı sensin 💕','Bravo '+ISIM+'!\nSana sonsuz sevgi ve kocaman bir sarılma.'];
+function bag(a){let b=[];return()=>{if(!b.length)b=a.slice().sort(()=>Math.random()-.5);return b.pop()}}
+const nextC=bag(CMP),nextF=bag(FIN);
+let lvl=0,first=null,lock=true,moves=0,found=0,pairs=0,A;
+function beep(f,d=.1){try{A=A||new AudioContext();const o=A.createOscillator(),g=A.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.07,A.currentTime);g.gain.exponentialRampToValueAtTime(.001,A.currentTime+d);o.connect(g);g.connect(A.destination);o.start();o.stop(A.currentTime+d)}catch(e){}}
+function chime(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.25),i*130))}
+const say=s=>$('msg').textContent=s;
+function upd(){$('mv').textContent='🔄 '+moves;$('lv').textContent=(lvl+1)+'. '+LV[lvl][0];$('pr').style.width=(pairs?found/pairs*100:0)+'%'}
+function show(h,p,b,fn){$('t').textContent=h;$('p').textContent=p;$('b').textContent=b;$('b').onclick=()=>{beep(520);$('ov').className='h';fn()};$('ov').className=''}
+function build(){
+ const [n,cnt,c]=LV[lvl];pairs=cnt/2;moves=0;found=0;first=null;lock=true;
+ const g=$('grid');g.style.setProperty('--c',c);g.innerHTML='';
+ const set=IC.slice().sort(()=>Math.random()-.5).slice(0,pairs),deck=[...set,...set].sort(()=>Math.random()-.5);
+ for(const e of deck){const b=document.createElement('button');b.className='card';b.setAttribute('aria-label','Kart');b.dataset.e=e;b.innerHTML='<div class="in"><div class="b">❤️</div><div class="f">'+e+'</div></div>';b.onclick=()=>flip(b);g.appendChild(b)}
+ upd();say('Önce ezberle! 👀');
+ const cs=[...g.children];setTimeout(()=>cs.forEach(c=>c.classList.add('open')),300);
+ setTimeout(()=>{cs.forEach(c=>c.classList.remove('open'));lock=false;say('Eşlerini bul!')},1800+pairs*250);
+}
+function fx(el,t='❤️'){const r=el.getBoundingClientRect();for(let i=0;i<2;i++){const s=document.createElement('span');s.className='fx';s.textContent=t;s.style.left=(r.left+r.width/2-14+(i?18:-18))+'px';s.style.top=(r.top+r.height/2-14)+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),1300)}}
+function flip(b){
+ if(lock||b.classList.contains('open'))return;
+ b.classList.add('open');beep(500);
+ if(!first){first=b;return}
+ const a=first;first=null;moves++;
+ if(a.dataset.e===b.dataset.e){a.classList.add('done');b.classList.add('done');found++;fx(a);fx(b,'✨');say(nextC());beep(880);upd();if(found===pairs)setTimeout(done,900)}
+ else{lock=true;upd();setTimeout(()=>{a.classList.remove('open');b.classList.remove('open');lock=false},900)}
+}
+function rain(){for(let i=0;i<40;i++){const s=document.createElement('span');s.className='rain';s.textContent=['❤️','🌷','✨','💕'][i%4];s.style.left=Math.random()*100+'vw';s.style.fontSize=(20+Math.random()*20)+'px';s.style.animationDuration=(2.5+Math.random()*2.5)+'s';s.style.animationDelay=Math.random()*1.5+'s';document.body.appendChild(s);setTimeout(()=>s.remove(),7000)}}
+function done(){
+ const s=moves<=pairs+3?3:moves<=Math.round(pairs*1.7)?2:1;chime();rain();
+ const star='★'.repeat(s)+'☆'.repeat(3-s)+'\n'+moves+' hamlede bitirdin';
+ if(lvl<LV.length-1)show('Seviye '+(lvl+1)+' tamam 🎉',LET[lvl]+'\n\n'+star,'Sıradaki seviye',()=>{lvl++;build()});
+ else show('Seni seviyorum '+ISIM+' ❤️',nextF()+'\n\n'+star,'Baştan oyna',()=>{lvl=0;build()});
+}
+show('Hafıza Bahçesi','Kartlara bak, aynı resimleri eşleştir.\nHer eşleşmede sana bir iltifat var.\n4 seviye seni bekliyor.','Başla',build);
+</script></body></html>
