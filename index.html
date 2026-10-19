@@ -131,7 +131,7 @@ $('mopen').onclick=openMirror;$('mclose').onclick=closeMirror;
 let hc=0,ht;
 $('hh').onclick=()=>{hc++;clearTimeout(ht);ht=setTimeout(()=>hc=0,1500);if(hc>=3){hc=0;openGz()}};
 function openGz(){const i=$('gi');i.style.display='block';$('gm').style.display='none';i.onerror=()=>{i.style.display='none';$('gm').style.display='flex'};i.src='foto.jpg';
- $('gt').textContent=typeof GIZLI_YAZI!=='undefined'?GIZLI_YAZI:'Seni çok seviyorum '+ISIM+' ❤️';$('gz').classList.add('on');
+ $('gt').textContent=typeof GIZLI_YAZI!=='undefined'?GIZLI_YAZI:'Seni çok seviyorum '+Annecim+' ❤️';$('gz').classList.add('on');
  for(let k=0;k<40;k++){const e=document.createElement('span');e.className='rain';e.textContent=['❤️','🌷','✨','💕'][k%4];e.style.left=Math.random()*100+'vw';e.style.fontSize=(20+Math.random()*20)+'px';e.style.animationDuration=(2.5+Math.random()*2.5)+'s';e.style.animationDelay=Math.random()*1.5+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),7000)}}
 $('gc').onclick=()=>$('gz').classList.remove('on');
 </script></body></html>
