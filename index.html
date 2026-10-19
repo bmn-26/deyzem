@@ -29,6 +29,18 @@ h1{font-size:clamp(54px,16vw,88px);color:var(--gold);margin:0;line-height:1}
 .go{font:inherit;font-size:30px;padding:8px 34px;border:0;border-radius:40px;background:var(--gold);color:#3a0c27;cursor:pointer;margin:4px}
 .go.s{background:transparent;color:var(--cream);border:2px solid var(--cream);font-size:26px}
 @media (prefers-reduced-motion:reduce){.fl{display:none}.card{transition:none}}
+.card.gold{border-color:var(--gold);background:rgba(255,210,122,.14)}
+.card.gold b{font-size:30px;line-height:1.05}
+#mir{position:fixed;inset:0;z-index:6;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:radial-gradient(circle at 50% 30%,#7d2447,#2c0a24 75%)}
+#mir.on{display:flex}
+.mf{position:relative;width:min(78vw,330px);aspect-ratio:3/4;margin-top:34px}
+.mf::before{content:"👑";position:absolute;top:-52px;left:0;right:0;font-size:56px;line-height:1;z-index:2}
+.mf .rim{position:absolute;inset:0;border-radius:50%/46%;padding:12px;background:linear-gradient(135deg,#fff1c2,#d9a43a 45%,#fff1c2 60%,#b8801f);box-shadow:0 0 40px rgba(255,210,122,.55),inset 0 0 10px #0006}
+.mf video{width:100%;height:100%;object-fit:cover;border-radius:50%/46%;transform:scaleX(-1);background:#1b0615;box-shadow:inset 0 0 22px #000a}
+.sp{position:absolute;font-size:26px;animation:tw 2.4s ease-in-out infinite;z-index:2}
+@keyframes tw{50%{transform:scale(1.4) rotate(15deg);opacity:.5}}
+#mcap{white-space:pre-line;font-size:clamp(30px,8vw,42px);line-height:1.15;color:var(--gold);max-width:420px;min-height:100px;margin:22px 0 12px}
+@media (prefers-reduced-motion:reduce){.sp{animation:none}}
 </style></head><body>
 <main>
 <h1>Teyzem için</h1>
@@ -37,12 +49,18 @@ h1{font-size:clamp(54px,16vw,88px);color:var(--gold);margin:0;line-height:1}
 <a class="card" href="hafiza.html"><div class="ic">🌷</div><div><b>Hafıza Bahçesi</b><span>Kartları eşleştir, her eşleşmede bir iltifat kazan.</span></div></a>
 <a class="card" href="iksir.html"><div class="ic">🧪</div><div><b>Sevgi İksirleri</b><span>İksirleri renklerine göre ayır. 30 seviye!</span></div></a>
 <button class="card" id="open"><div class="ic">☕</div><div><b>Sevgi Falı</b><span>Fincanı salla, falına ne çıkacak bak.</span></div></button>
+<button class="card gold" id="mopen"><div class="ic">🪞</div><div><b>Dünyanın en güzel teyzesini görmek için tıkla</b><span>Dikkat: çok güzel biri çıkabilir 😄</span></div></button>
 <div class="foot">Seni seviyorum <span id="n"></span> ❤️</div>
 </main>
 <div id="fal" role="dialog" aria-label="Sevgi falı">
 <button id="cup" aria-label="Fincanı salla">☕</button>
 <div id="ft">Fincana dokun ve salla!</div>
 <div><button class="go" id="again" hidden>Bir daha bak</button><button class="go s" id="close">Kapat</button></div>
+</div>
+<div id="mir" role="dialog" aria-label="Sihirli ayna">
+<div class="mf"><div class="rim"><video id="mvid" playsinline muted autoplay></video></div>
+<span class="sp" style="left:-14px;top:12%">✨</span><span class="sp" style="right:-14px;top:30%;animation-delay:.6s">💖</span><span class="sp" style="left:-10px;bottom:14%;animation-delay:1.2s">🌷</span><span class="sp" style="right:-8px;bottom:6%;animation-delay:1.8s">✨</span></div>
+<div id="mcap"></div><button class="go s" id="mclose">Kapat</button>
 </div>
 <script src="ayar.js"></script>
 <script>
@@ -57,4 +75,18 @@ function shake(){if(busy)return;busy=1;$('again').hidden=true;$('ft').textConten
 $('open').onclick=()=>{reset();$('fal').classList.add('on');$('cup').focus()};
 $('close').onclick=()=>$('fal').classList.remove('on');
 $('cup').onclick=shake;$('again').onclick=shake;
+
+const MC=['Dünyanın en güzel teyzesi burada! 👑','Maşallah, ne kadar güzelsin!','Gülüşün her şeye yeter ✨','Işıl ışıl parlıyorsun 💖','Hiç değişme, böyle güzel kal!','Aynadaki kişi çok sevilen biri '+ISIM+' 💕','Gözlerin yıldız gibi parlıyor','Seni seviyorum '+ISIM+' ❤️'];
+let ms,mi;
+async function openMirror(){
+ $('mir').classList.add('on');$('mcap').textContent='Aynaya bak...';
+ try{
+  ms=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+  $('mvid').srcObject=ms;await $('mvid').play();
+  let k=Math.floor(Math.random()*MC.length);$('mcap').textContent=MC[k];
+  mi=setInterval(()=>{k=(k+1)%MC.length;$('mcap').textContent=MC[k]},3000);
+ }catch(e){$('mcap').textContent='Kamera açılamadı 😔\nTarayıcıdan kamera iznini verip tekrar dene.'}
+}
+function closeMirror(){clearInterval(mi);if(ms)ms.getTracks().forEach(t=>t.stop());ms=null;$('mvid').srcObject=null;$('mir').classList.remove('on')}
+$('mopen').onclick=openMirror;$('mclose').onclick=closeMirror;
 </script></body></html>
