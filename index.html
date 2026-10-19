@@ -41,6 +41,8 @@ h1{font-size:clamp(54px,16vw,88px);color:var(--gold);margin:0;line-height:1}
 @keyframes tw{50%{transform:scale(1.4) rotate(15deg);opacity:.5}}
 #mcap{white-space:pre-line;font-size:clamp(30px,8vw,42px);line-height:1.15;color:var(--gold);max-width:420px;min-height:100px;margin:22px 0 12px}
 @media (prefers-reduced-motion:reduce){.sp{animation:none}}
+.mf canvas{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 0 22px rgba(255,210,122,.55))}
+#mvid{position:absolute;width:2px;height:2px;opacity:0;pointer-events:none}
 </style></head><body>
 <main>
 <h1>Teyzem için</h1>
@@ -58,7 +60,7 @@ h1{font-size:clamp(54px,16vw,88px);color:var(--gold);margin:0;line-height:1}
 <div><button class="go" id="again" hidden>Bir daha bak</button><button class="go s" id="close">Kapat</button></div>
 </div>
 <div id="mir" role="dialog" aria-label="Sihirli ayna">
-<div class="mf"><div class="rim"><div class="lens"><video id="mvid" playsinline muted autoplay></video></div></div>
+<div class="mf"><canvas id="mcv"></canvas><video id="mvid" playsinline muted autoplay></video>
 <span class="sp" style="left:-14px;top:12%">✨</span><span class="sp" style="right:-14px;top:30%;animation-delay:.6s">💖</span><span class="sp" style="left:-10px;bottom:14%;animation-delay:1.2s">🌷</span><span class="sp" style="right:-8px;bottom:6%;animation-delay:1.8s">✨</span></div>
 <div id="mcap"></div><button class="go s" id="mclose">Kapat</button>
 </div>
@@ -77,18 +79,40 @@ $('close').onclick=()=>$('fal').classList.remove('on');
 $('cup').onclick=shake;$('again').onclick=shake;
 
 const MC=['Dünyanın en güzel teyzesi burada! 👑','Maşallah, ne kadar güzelsin!','Gülüşün her şeye yeter ✨','Işıl ışıl parlıyorsun 💖','Hiç değişme, böyle güzel kal!','Aynadaki kişi çok sevilen biri '+ISIM+' 💕','Gözlerin yıldız gibi parlıyor','Seni seviyorum '+ISIM+' ❤️'];
-let ms,mi;
+const WARN='Kamera karanlık görünüyor 😔\nKamera kapağını, ışığı ve başka uygulamayı kontrol et.';
+let ms,mi,raf,dark=0,tk=0,ck=0;
+const bc=document.createElement('canvas');bc.width=bc.height=16;
+function drawMirror(){
+ const cv=$('mcv'),v=$('mvid'),d=devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;
+ if(w&&cv.width!==Math.round(w*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d)}
+ const x=cv.getContext('2d'),rx=w/2,ry=h/2,T=Math.PI*2;
+ x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,w,h);
+ x.save();x.beginPath();x.ellipse(rx,ry,rx-9,ry-9,0,0,T);x.clip();
+ x.fillStyle='#1b0615';x.fillRect(0,0,w,h);
+ if(v.videoWidth){const s=Math.max(w/v.videoWidth,h/v.videoHeight),dw=v.videoWidth*s,dh=v.videoHeight*s;x.translate(w,0);x.scale(-1,1);x.drawImage(v,(w-dw)/2,(h-dh)/2,dw,dh)}
+ x.restore();
+ const g=x.createLinearGradient(0,0,w,h);g.addColorStop(0,'#fff1c2');g.addColorStop(.35,'#d9a43a');g.addColorStop(.55,'#fff1c2');g.addColorStop(1,'#b8801f');
+ x.lineWidth=12;x.strokeStyle=g;x.beginPath();x.ellipse(rx,ry,rx-6,ry-6,0,0,T);x.stroke();
+ x.lineWidth=2;x.strokeStyle='#8a5d16';x.beginPath();x.ellipse(rx,ry,rx-12,ry-12,0,0,T);x.stroke();
+ raf=requestAnimationFrame(drawMirror);
+}
+function bright(){try{const x=bc.getContext('2d');x.drawImage($('mvid'),0,0,16,16);const p=x.getImageData(0,0,16,16).data;let t=0;for(let i=0;i<p.length;i+=4)t+=p[i]+p[i+1]+p[i+2];return t/768}catch(e){return 99}}
+const cap=t=>$('mcap').textContent=t;
+function tick(){
+ tk++;const d=bright()<6;
+ if(d){if(tk>=2&&!dark){dark=1;cap(WARN)}return}
+ if(dark){dark=0;ck=(ck+1)%MC.length;cap(MC[ck]);tk=0;return}
+ if(tk===1||tk%3===0){ck=(ck+1)%MC.length;cap(MC[ck])}
+}
 async function openMirror(){
- $('mir').classList.add('on');$('mcap').textContent='Aynaya bak...';
+ $('mir').classList.add('on');cap('Aynaya bak...');dark=0;tk=0;ck=Math.floor(Math.random()*MC.length);
+ cancelAnimationFrame(raf);drawMirror();
  try{
   ms=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
   $('mvid').srcObject=ms;await $('mvid').play();
-  let k=Math.floor(Math.random()*MC.length);$('mcap').textContent=MC[k];
-  mi=setInterval(()=>{k=(k+1)%MC.length;$('mcap').textContent=MC[k]},3000);
-  setTimeout(()=>{try{const v=$('mvid'),cv=document.createElement('canvas');cv.width=cv.height=16;const x=cv.getContext('2d');x.drawImage(v,0,0,16,16);const p=x.getImageData(0,0,16,16).data;let t=0;for(let i=0;i<p.length;i+=4)t+=p[i]+p[i+1]+p[i+2];
-   if(ms&&t/768<6){clearInterval(mi);$('mcap').textContent='Kamera karanlık görünüyor 😔\nKamera kapağını, ışığı ve başka uygulamayı kontrol et.'}}catch(e){}},2000);
- }catch(e){$('mcap').textContent='Kamera açılamadı 😔\nTarayıcıdan kamera iznini verip tekrar dene.'}
+  clearInterval(mi);mi=setInterval(tick,1000);
+ }catch(e){cap('Kamera açılamadı 😔\nTarayıcıdan kamera iznini verip tekrar dene.')}
 }
-function closeMirror(){clearInterval(mi);if(ms)ms.getTracks().forEach(t=>t.stop());ms=null;$('mvid').srcObject=null;$('mir').classList.remove('on')}
+function closeMirror(){clearInterval(mi);cancelAnimationFrame(raf);if(ms)ms.getTracks().forEach(t=>t.stop());ms=null;$('mvid').srcObject=null;$('mir').classList.remove('on')}
 $('mopen').onclick=openMirror;$('mclose').onclick=closeMirror;
 </script></body></html>
