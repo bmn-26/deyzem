@@ -35,7 +35,7 @@ h1{font-size:clamp(54px,16vw,88px);color:var(--gold);margin:0;line-height:1}
 #mir.on{display:flex}
 .mf{position:relative;width:min(78vw,330px);aspect-ratio:3/4;margin-top:34px}
 .mf::before{content:"👑";position:absolute;top:-52px;left:0;right:0;font-size:56px;line-height:1;z-index:2}
-.mf .rim{position:absolute;inset:0;border-radius:50%;padding:12px;background:linear-gradient(135deg,#fff1c2,#d9a43a 45%,#fff1c2 60%,#b8801f);box-shadow:0 0 40px rgba(255,210,122,.55),inset 0 0 10px #0006}
+.mf .rim{position:absolute;inset:0;border-radius:50%;padding:8px;background:conic-gradient(from 30deg,#fff1c2,#d9a43a,#fff1c2,#b8801f,#fff1c2,#d9a43a,#fff1c2);box-shadow:0 0 40px rgba(255,210,122,.55)}.mf .rim::after{content:"";position:absolute;inset:8px;border-radius:50%;box-shadow:0 0 0 2px #8a5d16;pointer-events:none;z-index:1}
 .lens{position:relative;width:100%;height:100%;border-radius:50%;overflow:hidden;clip-path:ellipse(50% 50% at 50% 50%);-webkit-clip-path:ellipse(50% 50% at 50% 50%);transform:translateZ(0);background:#1b0615}.lens::after{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 22px #000a;pointer-events:none}.mf video{display:block;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
 .sp{position:absolute;font-size:26px;animation:tw 2.4s ease-in-out infinite;z-index:2}
 @keyframes tw{50%{transform:scale(1.4) rotate(15deg);opacity:.5}}
@@ -85,6 +85,8 @@ async function openMirror(){
   $('mvid').srcObject=ms;await $('mvid').play();
   let k=Math.floor(Math.random()*MC.length);$('mcap').textContent=MC[k];
   mi=setInterval(()=>{k=(k+1)%MC.length;$('mcap').textContent=MC[k]},3000);
+  setTimeout(()=>{try{const v=$('mvid'),cv=document.createElement('canvas');cv.width=cv.height=16;const x=cv.getContext('2d');x.drawImage(v,0,0,16,16);const p=x.getImageData(0,0,16,16).data;let t=0;for(let i=0;i<p.length;i+=4)t+=p[i]+p[i+1]+p[i+2];
+   if(ms&&t/768<6){clearInterval(mi);$('mcap').textContent='Kamera karanlık görünüyor 😔\nKamera kapağını, ışığı ve başka uygulamayı kontrol et.'}}catch(e){}},2000);
  }catch(e){$('mcap').textContent='Kamera açılamadı 😔\nTarayıcıdan kamera iznini verip tekrar dene.'}
 }
 function closeMirror(){clearInterval(mi);if(ms)ms.getTracks().forEach(t=>t.stop());ms=null;$('mvid').srcObject=null;$('mir').classList.remove('on')}
