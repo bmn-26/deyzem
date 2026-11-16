@@ -42,7 +42,7 @@ h1{font-size:clamp(54px,16vw,88px);color:var(--gold);margin:0;line-height:1}
 #mcap{white-space:pre-line;font-size:clamp(30px,8vw,42px);line-height:1.15;color:var(--gold);max-width:420px;min-height:100px;margin:22px 0 12px}
 @media (prefers-reduced-motion:reduce){.sp{animation:none}}
 .mf canvas{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 0 22px rgba(255,210,122,.55))}
-#mvid{position:absolute;width:2px;height:2px;opacity:0;pointer-events:none}
+#mvid{position:fixed;left:0;top:0;width:4px;height:4px;opacity:.01;pointer-events:none}
 #hh{background:none;border:0;font:inherit;color:inherit;padding:0 2px;cursor:pointer}
 #gz{position:fixed;inset:0;z-index:7;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:radial-gradient(circle at 50% 30%,#7d2447,#2c0a24 75%)}
 #gz.on{display:flex}
@@ -120,10 +120,15 @@ async function openMirror(){
  $('mir').classList.add('on');cap('Aynaya bak...');dark=0;tk=0;ck=Math.floor(Math.random()*MC.length);
  cancelAnimationFrame(raf);drawMirror();
  try{
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw{name:'NoMedia'};
   ms=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
   $('mvid').srcObject=ms;await $('mvid').play();
   clearInterval(mi);mi=setInterval(tick,1000);
- }catch(e){cap('Kamera açılamadı 😔\nTarayıcıdan kamera iznini verip tekrar dene.')}
+ }catch(e){const n=e&&e.name||'';
+  cap(n==='NoMedia'?'Bu uygulama kamerayı açamıyor 😔\nLinki Safari\'de aç (sağ altta pusula simgesi ya da ⋯ → Safari\'de aç).':
+   n==='NotAllowedError'?'Kamera izni verilmemiş 😔\nAyarlar → Safari → Kamera kısmında "Sor" seç, sonra sayfayı yenile.':
+   n==='NotReadableError'?'Kamera başka bir uygulama tarafından kullanılıyor 😔\nDiğer uygulamaları kapatıp tekrar dene.':
+   n==='NotFoundError'?'Kamera bulunamadı 😔':'Kamera açılamadı 😔\n('+n+')')}
 }
 function closeMirror(){clearInterval(mi);cancelAnimationFrame(raf);if(ms)ms.getTracks().forEach(t=>t.stop());ms=null;$('mvid').srcObject=null;$('mir').classList.remove('on')}
 $('mopen').onclick=openMirror;$('mclose').onclick=closeMirror;
@@ -131,7 +136,7 @@ $('mopen').onclick=openMirror;$('mclose').onclick=closeMirror;
 let hc=0,ht;
 $('hh').onclick=()=>{hc++;clearTimeout(ht);ht=setTimeout(()=>hc=0,1500);if(hc>=3){hc=0;openGz()}};
 function openGz(){const i=$('gi');i.style.display='block';$('gm').style.display='none';i.onerror=()=>{i.style.display='none';$('gm').style.display='flex'};i.src='foto.jpg';
- $('gt').textContent=typeof GIZLI_YAZI!=='undefined'?GIZLI_YAZI:'Seni çok seviyorum '+Annecim+' ❤️';$('gz').classList.add('on');
+ $('gt').textContent=typeof GIZLI_YAZI!=='undefined'?GIZLI_YAZI:'Seni çok seviyorum '+ISIM+' ❤️';$('gz').classList.add('on');
  for(let k=0;k<40;k++){const e=document.createElement('span');e.className='rain';e.textContent=['❤️','🌷','✨','💕'][k%4];e.style.left=Math.random()*100+'vw';e.style.fontSize=(20+Math.random()*20)+'px';e.style.animationDuration=(2.5+Math.random()*2.5)+'s';e.style.animationDelay=Math.random()*1.5+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),7000)}}
 $('gc').onclick=()=>$('gz').classList.remove('on');
 </script></body></html>
